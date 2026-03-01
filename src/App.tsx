@@ -5,13 +5,13 @@ import type { FlowState, Option } from './Flow';
 
 function App() {
   const [currentState, setCurrentState] = useState<string>('START_MENU');
-  const [history, setHistory] = useState<{ question: string, answer: string }[]>([]);
+  const [history, setHistory] = useState<{ stateId: string, question: string, answer: string }[]>([]);
 
   const node = flowData[currentState as keyof typeof flowData] as FlowState;
 
   const handleOptionClick = (next: string | null, answerLabel: string) => {
     if (!node.isResult) {
-      setHistory([...history, { question: node.question || '', answer: answerLabel }]);
+      setHistory([...history, { stateId: currentState, question: node.question || '', answer: answerLabel }]);
     }
     if (next) {
       setCurrentState(next);
@@ -23,6 +23,13 @@ function App() {
     setHistory([]);
   };
 
+  const goBack = () => {
+    if (history.length === 0) return;
+    const previous = history[history.length - 1];
+    setCurrentState(previous.stateId);
+    setHistory(history.slice(0, -1));
+  };
+
   return (
     <div className="app-container">
       <div className="wizard-card">
@@ -32,9 +39,14 @@ function App() {
           <div className={`result-card ${node.type || 'success'}`}>
             <h3>{node.type === 'danger' ? '⚠️ Acción Crítica' : '✅ Resolución'}</h3>
             <p className="result-action"><strong>{node.question}</strong></p>
-            <button className="reset-btn" onClick={resetFlow}>
-              🔄 Iniciar Nuevo Llamado
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button className="reset-btn" onClick={goBack}>
+                🔙 Corregir respuesta anterior
+              </button>
+              <button className="reset-btn" onClick={resetFlow}>
+                🔄 Iniciar Nuevo Llamado
+              </button>
+            </div>
           </div>
         ) : (
           <div>
@@ -63,9 +75,14 @@ function App() {
               </div>
             ))}
             {!node.isResult && (
-              <button className="reset-btn" style={{ marginTop: '1.5rem' }} onClick={resetFlow}>
-                🔄 Reiniciar Flujo
-              </button>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                <button className="reset-btn" onClick={goBack}>
+                  🔙 Volver un paso atrás
+                </button>
+                <button className="reset-btn" onClick={resetFlow}>
+                  🔄 Reiniciar Flujo
+                </button>
+              </div>
             )}
           </div>
         )}

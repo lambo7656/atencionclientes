@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 callcenter
 callcenter.exe
+callcenter 2
+callcenter-macos-arm64
+*.zip
